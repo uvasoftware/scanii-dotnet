@@ -2,7 +2,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <PackageId>UvaSoftware.Scanii</PackageId>
-    <Version>3.0.1</Version>
+    
+    <!--always rev this up-->
+    <Version>3.0.2</Version>
+    
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
     <Description>.Net client for the https://scanii.com content identification service</Description>
