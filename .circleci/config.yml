@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/ci
+    docker:
+      - image: debian:stretch
+
+    steps:
+      # basic dependencies required by circleci:
+      - run: apt-get update -qq && apt-get install -qqy git unzip ssh ca-certificates tar gzip
+      - checkout
+
+      - run:
+          name: Installing dotnet
+          command: bash ./.circleci/install.sh
+          
+      - run:
+          name: Building
+          command: dotnet build 
+          
+      - run:
+          name: Testing
+          command: dotnet test 
+          
+  deploy:
+    working_directory: ~/ci
+    docker:
+      - image: debian:stretch
+
+    steps:
+      - run: apt-get update -qq && apt-get install -qqy git unzip ssh ca-certificates tar gzip
+      - checkout
+
+    
+
+build_and_deploy:
+  jobs:
+    - build
+    - deploy:
+        requires:
+          - build
+        filters:
+            branches:
+                only: master
