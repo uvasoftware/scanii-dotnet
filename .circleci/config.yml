@@ -30,6 +30,13 @@ jobs:
     steps:
       - run: apt-get update -qq && apt-get install -qqy git unzip ssh ca-certificates tar gzip
       - checkout
+      - run:
+          name: Installing dotnet
+          command: bash ./.circleci/install.sh
+          
+      - run:
+          name: Nuget Publish
+          command: bash ./.circleci/deploy.sh
 
     
 
