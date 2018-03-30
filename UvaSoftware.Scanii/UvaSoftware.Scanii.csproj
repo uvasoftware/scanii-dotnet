@@ -6,6 +6,12 @@
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
     <Description>.Net client for the https://scanii.com content identification service</Description>
+    <PackageLicenseUrl>https://github.com/uvasoftware/scanii-dotnet/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/uvasoftware/scanii-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
+    <Copyright>Uva Software, LLC</Copyright>
+    <PackageTags>scanii,client</PackageTags>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.2"/>
