@@ -4,11 +4,11 @@
     <PackageId>UvaSoftware.Scanii</PackageId>
     
     <!--always rev this up-->
-    <Version>3.0.2</Version>
+    <Version>3.0.3</Version>
     
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
-    <Description>.Net client for the https://scanii.com content identification service</Description>
+    <Description>.NET interface to the scanii.com content processing service</Description>
     <PackageLicenseUrl>https://github.com/uvasoftware/scanii-dotnet/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/uvasoftware/scanii-dotnet</RepositoryUrl>
     <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
