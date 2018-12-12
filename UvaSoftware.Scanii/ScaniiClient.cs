@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
@@ -108,10 +108,11 @@ namespace UvaSoftware.Scanii
     /// Submits a file to be processed asynchornously (http://docs.scanii.com/v2.1/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
+    /// <param name="callback">location (URL) to be notified and receive the result</param>
     /// <param name="metadata">optional metadata to be added to this file</param>
     /// <returns>processing result</returns>
     /// <exception cref="ScaniiException"></exception>
-    public ScaniiResult ProcessAsync(string path, Dictionary<string, string> metadata)
+    public ScaniiResult ProcessAsync(string path, string callback, Dictionary<string, string> metadata)
     {
       var req = new RestRequest("files/async", Method.POST);
 
@@ -122,6 +123,11 @@ namespace UvaSoftware.Scanii
       {
         Log.Logger.Debug("medata item " + keyValuePair);
         req.AddParameter($"metadata[{keyValuePair.Key}]", keyValuePair.Value);
+      }
+
+      if (callback != null)
+      {
+        req.AddParameter("callback", callback);
       }
 
       var resp = RestClient.Execute(req);
@@ -143,11 +149,24 @@ namespace UvaSoftware.Scanii
     /// Submits a file to be processed asynchornously (http://docs.scanii.com/v2.1/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
+    /// <param name="metadata">optional metadata to be added to this file</param>
     /// <returns>processing result</returns>
     /// <exception cref="ScaniiException"></exception>
-    public ScaniiResult ProcessAsync(string path)
+    public ScaniiResult ProcessAsync(string path, Dictionary<string, string> metadata = null)
     {
-      return ProcessAsync(path, new Dictionary<string, string>());
+      return ProcessAsync(path, null, metadata ?? new Dictionary<string, string>());
+    }
+
+    /// <summary>
+    /// Submits a file to be processed asynchornously (http://docs.scanii.com/v2.1/resources.html#files)
+    /// </summary>
+    /// <param name="path">file path on the local system</param>
+    /// <param name="callback">location (URL) to be notified and receive the result</param>
+    /// <returns>processing result</returns>
+    /// <exception cref="ScaniiException"></exception>
+    public ScaniiResult ProcessAsync(string path, string callback)
+    {
+      return ProcessAsync(path, callback, new Dictionary<string, string>());
     }
 
     /// <summary>
