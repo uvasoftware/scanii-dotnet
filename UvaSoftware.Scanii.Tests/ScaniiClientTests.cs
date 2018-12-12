@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -17,6 +17,8 @@ namespace UvaSoftware.Scanii.Tests
     private readonly string _eicarFile = Path.GetTempFileName();
     private readonly string _key;
     private readonly string _secret;
+    private readonly string _checksum = "a6c80ce949469cc86f6c22355f4d3bb8773fc634";
+    private readonly string _eicarRemoteChecksum = "bec1b52d350d721c7e22a6d4bb0a92909893a3ae";
 
     public ScaniiClientTests()
     {
@@ -59,7 +61,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("text/plain", r.ContentType);
       Assert.AreEqual("bar", r.Metadata["foo"]);
       Assert.AreEqual(1, r.Metadata.Count);
-      Assert.AreEqual("cf8bd9dfddff007f75adf4c2be48005cea317c62", r.Checksum);
+      Assert.AreEqual(_checksum, r.Checksum);
       Assert.NotNull(r.ContentLength);
       Assert.NotNull(r.CreationDate);
       Assert.NotNull(r.RawResponse);
@@ -87,7 +89,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, r.Findings.Count);
       Assert.AreEqual("text/plain", r.ContentType);
       Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual("cf8bd9dfddff007f75adf4c2be48005cea317c62", r.Checksum);
+      Assert.AreEqual(_checksum, r.Checksum);
       Assert.NotNull(r.ContentLength);
       Assert.NotNull(r.CreationDate);
       Assert.NotNull(r.RawResponse);
@@ -103,7 +105,7 @@ namespace UvaSoftware.Scanii.Tests
     }
 
     [Test]
-    public void ShouldProcessAsync()
+    public void ShouldProcessAsyncWithoutCallback()
     {
       Log.Logger.Information("submitting content for async processing...");
 
@@ -144,7 +146,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual("bar", finalResult.Metadata["foo"]);
       Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual("cf8bd9dfddff007f75adf4c2be48005cea317c62", finalResult.Checksum);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -161,7 +163,7 @@ namespace UvaSoftware.Scanii.Tests
 
 
     [Test]
-    public void ShouldProcessAsyncWithoutMetadata()
+    public void ShouldProcessAsyncWithoutCallBackAndMetadata()
     {
       Log.Logger.Information("submitting content for async processing...");
 
@@ -198,11 +200,77 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual(0, finalResult.Metadata.Count);
-      Assert.AreEqual("cf8bd9dfddff007f75adf4c2be48005cea317c62", finalResult.Checksum);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
 
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
+      Assert.Null(finalResult.Message);
+      Assert.Null(finalResult.ExpirationDate);
+    }
+
+    [Test]
+    public void ShouldProcessAsyncWithCallback()
+    {
+      var r = _client.ProcessAsync(_eicarFile, "https://httpbin.org/post");
+
+      Log.Logger.Debug("response: {r}", r);
+
+      Assert.NotNull(r.ResourceId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("text/plain", finalResult.ContentType);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+      Assert.NotNull(finalResult.RawResponse);
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
+      Assert.Null(finalResult.Message);
+      Assert.Null(finalResult.ExpirationDate);
+    }
+
+    [Test]
+    public void ShouldProcessAsyncWithCallbackAndMetadata()
+    {
+      var r = _client.ProcessAsync(_eicarFile, "https://httpbin.org/post", new Dictionary<string, string>
+      {
+        {"foo", "bar"}
+      });
+
+      Log.Logger.Debug("response: {r}", r);
+
+      Assert.NotNull(r.ResourceId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("text/plain", finalResult.ContentType);
+      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+      Assert.NotNull(finalResult.RawResponse);
 
       Assert.NotNull(finalResult.HostId);
       Assert.NotNull(finalResult.ResourceId);
@@ -249,7 +317,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual("bec1b52d350d721c7e22a6d4bb0a92909893a3ae", finalResult.Checksum);
+      Assert.AreEqual(_eicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -277,7 +345,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual("bec1b52d350d721c7e22a6d4bb0a92909893a3ae", finalResult.Checksum);
+      Assert.AreEqual(_eicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -311,7 +379,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("application/zip", finalResult.ContentType);
       Assert.AreEqual("world", finalResult.Metadata["hello"]);
       Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual("bec1b52d350d721c7e22a6d4bb0a92909893a3ae", finalResult.Checksum);
+      Assert.AreEqual(_eicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -345,7 +413,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(result.ResourceId);
       Assert.True(result.Findings.Contains(Finding));
       Assert.AreEqual(1, result.Findings.Count);
-      Assert.AreEqual("cf8bd9dfddff007f75adf4c2be48005cea317c62", result.Checksum);
+      Assert.AreEqual(_checksum, result.Checksum);
       Assert.NotNull(result.ContentLength);
       Assert.NotNull(result.CreationDate);
       Assert.NotNull(result.RawResponse);
