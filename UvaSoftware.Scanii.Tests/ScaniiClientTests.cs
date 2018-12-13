@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using Serilog;
 
 namespace UvaSoftware.Scanii.Tests
@@ -17,7 +16,7 @@ namespace UvaSoftware.Scanii.Tests
     private readonly string _eicarFile = Path.GetTempFileName();
     private readonly string _key;
     private readonly string _secret;
-    private readonly string _checksum = "a6c80ce949469cc86f6c22355f4d3bb8773fc634";
+    private readonly string _checksum = "cf8bd9dfddff007f75adf4c2be48005cea317c62";
     private readonly string _eicarRemoteChecksum = "bec1b52d350d721c7e22a6d4bb0a92909893a3ae";
 
     public ScaniiClientTests()
@@ -447,7 +446,7 @@ namespace UvaSoftware.Scanii.Tests
     {
       foreach (ScaniiTarget target in Enum.GetValues(typeof(ScaniiTarget)))
       {
-        Log.Logger.Information("creasting client for target {target}", target);
+        Log.Logger.Information("creating client for target {target}", target);
         Assert.IsTrue(new ScaniiClient(target, _key, _secret).Ping());
       }
     }
