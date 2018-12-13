@@ -74,7 +74,7 @@ namespace UvaSoftware.Scanii
 
       foreach (var keyValuePair in metadata)
       {
-        Log.Logger.Debug("medata item " + keyValuePair);
+        Log.Logger.Debug("metadata item " + keyValuePair);
         req.AddParameter($"metadata[{keyValuePair.Key}]", keyValuePair.Value);
       }
 
@@ -105,7 +105,7 @@ namespace UvaSoftware.Scanii
     }
 
     /// <summary>
-    /// Submits a file to be processed asynchornously (http://docs.scanii.com/v2.1/resources.html#files)
+    /// Submits a file to be processed asynchronously (http://docs.scanii.com/v2.1/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
     /// <param name="callback">location (URL) to be notified and receive the result</param>
@@ -121,7 +121,7 @@ namespace UvaSoftware.Scanii
 
       foreach (var keyValuePair in metadata)
       {
-        Log.Logger.Debug("medata item " + keyValuePair);
+        Log.Logger.Debug("metadata item " + keyValuePair);
         req.AddParameter($"metadata[{keyValuePair.Key}]", keyValuePair.Value);
       }
 
@@ -146,7 +146,7 @@ namespace UvaSoftware.Scanii
     }
 
     /// <summary>
-    /// Submits a file to be processed asynchornously (http://docs.scanii.com/v2.1/resources.html#files)
+    /// Submits a file to be processed asynchronously (http://docs.scanii.com/v2.1/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
     /// <param name="metadata">optional metadata to be added to this file</param>
@@ -158,7 +158,7 @@ namespace UvaSoftware.Scanii
     }
 
     /// <summary>
-    /// Submits a file to be processed asynchornously (http://docs.scanii.com/v2.1/resources.html#files)
+    /// Submits a file to be processed asynchronously (http://docs.scanii.com/v2.1/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
     /// <param name="callback">location (URL) to be notified and receive the result</param>
@@ -193,7 +193,7 @@ namespace UvaSoftware.Scanii
     /// <summary>
     /// Pings the scanii service using the credentials provided (http://docs.scanii.com/v2.1/resources.html#ping)
     /// </summary>
-    /// <returns>true if ping was succesful, false otherwise</returns>
+    /// <returns>true if ping was successful, false otherwise</returns>
     /// <exception cref="ScaniiException"></exception>
     public bool Ping()
     {
@@ -252,7 +252,7 @@ namespace UvaSoftware.Scanii
 
       foreach (var keyValuePair in metadata)
       {
-        Log.Logger.Debug("medata item " + keyValuePair);
+        Log.Logger.Debug("metadata item " + keyValuePair);
         req.AddParameter($"metadata[{keyValuePair.Key}]", keyValuePair.Value);
       }
 
