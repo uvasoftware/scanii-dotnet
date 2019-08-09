@@ -1,16 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- donet requires that tests match a specific version hence this differs from the main assembly -->
+    <!-- see https://github.com/nunit/docs/wiki/.NET-Core-and-.NET-Standard -->
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <PackageId>UvaSoftware.Scanii.Tests</PackageId>
+
+    <!--always rev this up-->
+    <Version>3.2.0</Version>
+
+    <Company>Uva Software, LLC</Company>
+    <Authors>Uva Software Engineers</Authors>
+    <Description>.NET interface to the scanii.com content processing service</Description>
+    <PackageLicenseUrl>https://github.com/uvasoftware/scanii-dotnet/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/uvasoftware/scanii-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
+    <Copyright>Uva Software, LLC</Copyright>
+    <PackageTags>scanii,client</PackageTags>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NUnit" Version="3.10.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-    <PackageReference Include="Serilog" Version="2.6.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0"/>
+    <PackageReference Include="NUnit" Version="3.12.0"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.14.0"/>
+    <PackageReference Include="Serilog" Version="2.8.0"/>
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1"/>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UvaSoftware.Scanii\UvaSoftware.Scanii.csproj" />
+    <ProjectReference Include="..\UvaSoftware.Scanii\UvaSoftware.Scanii.csproj"/>
   </ItemGroup>
 </Project>

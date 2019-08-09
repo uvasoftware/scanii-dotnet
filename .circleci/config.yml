@@ -13,15 +13,11 @@ jobs:
       - run:
           name: Installing dotnet
           command: bash ./.circleci/install.sh
-          
+
       - run:
-          name: Building
-          command: dotnet build 
-          
-      - run:
-          name: Testing
-          command: dotnet test 
-          
+          name: Building and testing
+          command: bash ./.circleci/build-and-test.sh
+
   deploy:
     working_directory: ~/ci
     docker:
@@ -47,5 +43,5 @@ workflows:
           requires:
             - build
           filters:
-              branches:
-                  only: master
+            branches:
+              only: master

@@ -13,10 +13,10 @@ dotnet add package UvaSoftware.Scanii --version $LATEST_VERSION
  
 ```csharp
  // creating the client
-var _client = new ScaniiClient(ScaniiTarget.V21, KEY, SECRET);
+var client = new ScaniiClient(ScaniiTarget.V21, KEY, SECRET);
  
  // scans a file
-var result = _client.Process("file.doc")
+var result = client.Process("C:\proposal.doc")
 Console.WriteLine(result);
 
 ```
