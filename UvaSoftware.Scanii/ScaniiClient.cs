@@ -15,7 +15,7 @@ namespace UvaSoftware.Scanii
     private Version _version;
 
     /// <summary>
-    /// Creates a new Scanii Client from a key/scret pair
+    /// Creates a new Scanii Client from a key/secret pair
     /// </summary>
     /// <param name="target">the API target to use @see ScaniiTarget</param>
     /// <param name="key">the key to use</param>
