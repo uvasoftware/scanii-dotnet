@@ -11,10 +11,16 @@ namespace UvaSoftware.Scanii.Internal
       {ScaniiTarget.V21, "https://api.scanii.com/v2.1"},
 
       {ScaniiTarget.V20Ap1, "https://api-ap1.scanii.com/v2.0"},
+      {ScaniiTarget.V20Ap2, "https://api-ap2.scanii.com/v2.0"},
+
       {ScaniiTarget.V21Ap1, "https://api-ap1.scanii.com/v2.1"},
+      {ScaniiTarget.V21Ap2, "https://api-ap2.scanii.com/v2.1"},
 
       {ScaniiTarget.V20Eu1, "https://api-eu1.scanii.com/v2.0"},
+      {ScaniiTarget.V20Eu2, "https://api-eu2.scanii.com/v2.0"},
+
       {ScaniiTarget.V21Eu1, "https://api-eu1.scanii.com/v2.1"},
+      {ScaniiTarget.V21Eu2, "https://api-eu2.scanii.com/v2.1"},
 
       {ScaniiTarget.V20Us1, "https://api-us1.scanii.com/v2.0"},
       {ScaniiTarget.V21Us1, "https://api-us1.scanii.com/v2.1"}

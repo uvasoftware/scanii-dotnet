@@ -16,8 +16,8 @@ namespace UvaSoftware.Scanii.Tests
     private readonly string _eicarFile = Path.GetTempFileName();
     private readonly string _key;
     private readonly string _secret;
-    private readonly string _checksum = "cf8bd9dfddff007f75adf4c2be48005cea317c62";
-    private readonly string _eicarRemoteChecksum = "bec1b52d350d721c7e22a6d4bb0a92909893a3ae";
+    private const string Checksum = "cf8bd9dfddff007f75adf4c2be48005cea317c62";
+    private const string EicarRemoteChecksum = "bec1b52d350d721c7e22a6d4bb0a92909893a3ae";
 
     public ScaniiClientTests()
     {
@@ -60,7 +60,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("text/plain", r.ContentType);
       Assert.AreEqual("bar", r.Metadata["foo"]);
       Assert.AreEqual(1, r.Metadata.Count);
-      Assert.AreEqual(_checksum, r.Checksum);
+      Assert.AreEqual(Checksum, r.Checksum);
       Assert.NotNull(r.ContentLength);
       Assert.NotNull(r.CreationDate);
       Assert.NotNull(r.RawResponse);
@@ -88,7 +88,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, r.Findings.Count);
       Assert.AreEqual("text/plain", r.ContentType);
       Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(_checksum, r.Checksum);
+      Assert.AreEqual(Checksum, r.Checksum);
       Assert.NotNull(r.ContentLength);
       Assert.NotNull(r.CreationDate);
       Assert.NotNull(r.RawResponse);
@@ -145,7 +145,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual("bar", finalResult.Metadata["foo"]);
       Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -199,7 +199,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual(0, finalResult.Metadata.Count);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -231,7 +231,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -266,7 +266,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual("bar", finalResult.Metadata["foo"]);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -316,7 +316,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual(_eicarRemoteChecksum, finalResult.Checksum);
+      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -344,7 +344,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual(_eicarRemoteChecksum, finalResult.Checksum);
+      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -378,7 +378,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("application/zip", finalResult.ContentType);
       Assert.AreEqual("world", finalResult.Metadata["hello"]);
       Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(_eicarRemoteChecksum, finalResult.Checksum);
+      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
       Assert.NotNull(finalResult.RawResponse);
@@ -412,7 +412,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(result.ResourceId);
       Assert.True(result.Findings.Contains(Finding));
       Assert.AreEqual(1, result.Findings.Count);
-      Assert.AreEqual(_checksum, result.Checksum);
+      Assert.AreEqual(Checksum, result.Checksum);
       Assert.NotNull(result.ContentLength);
       Assert.NotNull(result.CreationDate);
       Assert.NotNull(result.RawResponse);

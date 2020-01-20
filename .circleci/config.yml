@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/ci
     docker:
-      - image: debian:stretch
+      - image: debian:10
 
     steps:
       # basic dependencies required by circleci:
@@ -21,7 +21,7 @@ jobs:
   deploy:
     working_directory: ~/ci
     docker:
-      - image: debian:stretch
+      - image: debian:10
 
     steps:
       - run: apt-get update -qq && apt-get install -qqy git unzip ssh ca-certificates tar gzip

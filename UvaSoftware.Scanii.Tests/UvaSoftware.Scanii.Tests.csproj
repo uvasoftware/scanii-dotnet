@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- donet requires that tests match a specific version hence this differs from the main assembly -->
+    <!-- dotnet requires that tests match a specific version hence this differs from the main assembly -->
     <!-- see https://github.com/nunit/docs/wiki/.NET-Core-and-.NET-Standard -->
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageId>UvaSoftware.Scanii.Tests</PackageId>
 
     <!--always rev this up-->
-    <Version>3.2.0</Version>
+    <Version>3.3.0</Version>
 
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
@@ -19,10 +19,10 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0"/>
     <PackageReference Include="NUnit" Version="3.12.0"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.14.0"/>
-    <PackageReference Include="Serilog" Version="2.8.0"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
+    <PackageReference Include="Serilog" Version="2.9.0"/>
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1"/>
   </ItemGroup>
   <ItemGroup>
