@@ -11,7 +11,7 @@
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
     <Description>.NET interface to the scanii.com content processing service</Description>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/uvasoftware/scanii-dotnet</RepositoryUrl>
     <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
     <Copyright>Uva Software, LLC</Copyright>
