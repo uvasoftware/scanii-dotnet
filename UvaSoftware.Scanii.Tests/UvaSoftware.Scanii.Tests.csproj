@@ -6,16 +6,17 @@
     <PackageId>UvaSoftware.Scanii.Tests</PackageId>
 
     <!--always rev this up-->
-    <Version>3.3.0</Version>
+    <Version>3.3.1</Version>
 
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
     <Description>.NET interface to the scanii.com content processing service</Description>
-    <PackageLicenseUrl>https://github.com/uvasoftware/scanii-dotnet/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/uvasoftware/scanii-dotnet</RepositoryUrl>
     <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
     <Copyright>Uva Software, LLC</Copyright>
     <PackageTags>scanii,client</PackageTags>
+
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
