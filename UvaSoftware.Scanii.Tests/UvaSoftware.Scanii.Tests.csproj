@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- dotnet requires that tests match a specific version hence this differs from the main assembly -->
-    <!-- see https://github.com/nunit/docs/wiki/.NET-Core-and-.NET-Standard -->
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net461;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
     <PackageId>UvaSoftware.Scanii.Tests</PackageId>
 
     <!--always rev this up-->
-    <Version>3.3.1</Version>
+    <Version>4.0.0</Version>
 
+    <LangVersion>8</LangVersion>
     <Company>Uva Software, LLC</Company>
     <Authors>Uva Software Engineers</Authors>
     <Description>.NET interface to the scanii.com content processing service</Description>
@@ -16,17 +15,18 @@
     <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
     <Copyright>Uva Software, LLC</Copyright>
     <PackageTags>scanii,client</PackageTags>
-
+    <IncludeSymbols>true</IncludeSymbols>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0"/>
-    <PackageReference Include="NUnit" Version="3.12.0"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
-    <PackageReference Include="Serilog" Version="2.9.0"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="NUnit" Version="3.13.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.2-dev-10284" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0-dev-00839" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UvaSoftware.Scanii\UvaSoftware.Scanii.csproj"/>
+    <ProjectReference Include="..\UvaSoftware.Scanii\UvaSoftware.Scanii.csproj" />
   </ItemGroup>
 </Project>

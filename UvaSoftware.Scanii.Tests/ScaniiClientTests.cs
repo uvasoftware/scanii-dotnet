@@ -1,16 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
+using Serilog.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace UvaSoftware.Scanii.Tests
 {
   [TestFixture]
   public class ScaniiClientTests
   {
-    private readonly ScaniiClient _client;
+    private readonly IScaniiClient _client;
+    private readonly ILogger _logger;
     private const string Eicar = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
     private const string Finding = "content.malicious.eicar-test-signature";
     private readonly string _eicarFile = Path.GetTempFileName();
@@ -21,12 +28,15 @@ namespace UvaSoftware.Scanii.Tests
 
     public ScaniiClientTests()
     {
-      Log.Logger = new LoggerConfiguration()
+      var serilogLogger = new LoggerConfiguration()
         .WriteTo.Console()
-        .MinimumLevel.Debug()
+        .MinimumLevel.Is(LevelConvert.ToSerilogLevel(LogLevel.Debug))
         .CreateLogger();
 
-      Log.Logger.Debug("ctor");
+      var provider = new SerilogLoggerProvider(serilogLogger);
+      _logger = provider.CreateLogger("ScaniiClientTests");
+
+      _logger.LogDebug("ctor");
 
       if (Environment.GetEnvironmentVariable("SCANII_CREDS") != null)
       {
@@ -36,281 +46,62 @@ namespace UvaSoftware.Scanii.Tests
         _secret = creds[1];
       }
 
-      _client = new ScaniiClient(_key, _secret);
-      using (var output = new StreamWriter(_eicarFile))
-      {
-        output.WriteLine(Eicar);
-      }
+      Debug.Assert(_secret != null, nameof(_secret) + " != null");
+      Debug.Assert(_key != null, nameof(_key) + " != null");
+
+      _client = ScaniiClients.CreateDefault(_key, _secret, _logger, new HttpClient());
+      using var output = new StreamWriter(_eicarFile);
+      output.WriteLine(Eicar);
     }
 
     [Test]
-    public void ShouldProcessContent()
+    public async Task ShouldCreateAuthToken()
     {
-      // starting with a simple content scan (sync)
-      var r = _client.Process(_eicarFile, new Dictionary<string, string>
-      {
-        {"foo", "bar"}
-      });
+      var token = await _client.CreateAuthToken(5);
+      Assert.NotNull(token.RequestId);
+      Assert.NotNull(token.CreationDate);
+      Assert.NotNull(token.ExpirationDate);
 
-      Log.Logger.Debug("response: {r}", r);
+      _logger.LogInformation("using auth token to create a new client...");
+    }
+    [Test]
+    public async Task ShouldCreatedUsableAuthTokens()
+    {
+      var token = await _client.CreateAuthToken(5);
+      var client2 = ScaniiClients.CreateDefault(token.ResourceId);
 
-      Assert.NotNull(r.ResourceId);
-      Assert.True(r.Findings.Contains(Finding));
-      Assert.AreEqual(1, r.Findings.Count);
-      Assert.AreEqual("text/plain", r.ContentType);
-      Assert.AreEqual("bar", r.Metadata["foo"]);
-      Assert.AreEqual(1, r.Metadata.Count);
-      Assert.AreEqual(Checksum, r.Checksum);
-      Assert.NotNull(r.ContentLength);
-      Assert.NotNull(r.CreationDate);
-      Assert.NotNull(r.RawResponse);
+      _logger.LogInformation("using token to process content");
 
+      var result = await client2.Process(_eicarFile);
 
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-      Assert.NotNull(r.RequestId);
-
-      Assert.Null(r.Message);
-      Assert.Null(r.ExpirationDate);
+      Assert.NotNull(result.ResourceId);
+      Assert.True(result.Findings.Contains(Finding));
+      Assert.AreEqual(1, result.Findings.Count);
+      Assert.AreEqual(Checksum, result.Checksum);
+      Assert.NotNull(result.ContentLength);
+      Assert.NotNull(result.CreationDate);
     }
 
     [Test]
-    public void ShouldProcessContentWithoutMetadata()
+    public async Task ShouldDeleteAuthToken()
     {
-      // starting with a simple content scan (sync)
-      var r = _client.Process(_eicarFile);
+      var token = await _client.CreateAuthToken(1);
+      await _client.DeleteAuthToken(token.ResourceId);
+      var token2 = await _client.RetrieveAuthToken(token.ResourceId);
 
-      Log.Logger.Debug("response: {r}", r);
-
-      Assert.NotNull(r.ResourceId);
-      Assert.True(r.Findings.Contains(Finding));
-      Assert.AreEqual(1, r.Findings.Count);
-      Assert.AreEqual("text/plain", r.ContentType);
-      Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(Checksum, r.Checksum);
-      Assert.NotNull(r.ContentLength);
-      Assert.NotNull(r.CreationDate);
-      Assert.NotNull(r.RawResponse);
-
-
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-      Assert.NotNull(r.RequestId);
-
-      Assert.Null(r.Message);
-      Assert.Null(r.ExpirationDate);
+      Assert.AreEqual(token.ResourceId, token2.ResourceId);
+      Assert.AreEqual(token.ExpirationDate, token2.ExpirationDate);
+      Assert.AreEqual(token.CreationDate, token2.CreationDate);
     }
 
     [Test]
-    public void ShouldProcessAsyncWithoutCallback()
+    public async Task ShouldFetchContentWithCallback()
     {
-      Log.Logger.Information("submitting content for async processing...");
-
-      var r = _client.ProcessAsync(_eicarFile, new Dictionary<string, string>
-      {
-        {"foo", "bar"}
-      });
-
-      Log.Logger.Debug("response: {r}", r);
-
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-
-      Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(0, r.ContentLength);
-      Assert.Null(r.CreationDate);
-      Assert.Null(r.Checksum);
-      Assert.Null(r.ContentType);
-
-      Assert.NotNull(r.RawResponse);
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.RequestId);
-
-      Assert.Null(r.Message);
-      Assert.Null(r.ExpirationDate);
-
-
-      Log.Logger.Information("request looks good, trying to retrieve result for id: {id}", r.ResourceId);
+      var r = await _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip", "https://httpbin.org/post");
 
       Thread.Sleep(1000);
 
-      var finalResult = _client.Retrieve(r.ResourceId);
-
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
-      Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
-
-
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-
-      Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
-    }
-
-
-    [Test]
-    public void ShouldProcessAsyncWithoutCallBackAndMetadata()
-    {
-      Log.Logger.Information("submitting content for async processing...");
-
-      var r = _client.ProcessAsync(_eicarFile);
-
-      Log.Logger.Debug("response: {r}", r);
-
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-
-      Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(0, r.ContentLength);
-      Assert.Null(r.CreationDate);
-      Assert.Null(r.Checksum);
-      Assert.Null(r.ContentType);
-
-      Assert.NotNull(r.RawResponse);
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.RequestId);
-
-      Assert.Null(r.Message);
-      Assert.Null(r.ExpirationDate);
-
-
-      Log.Logger.Information("request looks good, trying to retrieve result for id: {id}", r.ResourceId);
-
-      Thread.Sleep(1000);
-
-      var finalResult = _client.Retrieve(r.ResourceId);
-
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual(0, finalResult.Metadata.Count);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
-
-
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-
-      Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
-    }
-
-    [Test]
-    public void ShouldProcessAsyncWithCallback()
-    {
-      var r = _client.ProcessAsync(_eicarFile, "https://httpbin.org/post");
-
-      Log.Logger.Debug("response: {r}", r);
-
-      Assert.NotNull(r.ResourceId);
-
-      Thread.Sleep(1000);
-
-      var finalResult = _client.Retrieve(r.ResourceId);
-
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
-
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-
-      Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
-    }
-
-    [Test]
-    public void ShouldProcessAsyncWithCallbackAndMetadata()
-    {
-      var r = _client.ProcessAsync(_eicarFile, "https://httpbin.org/post", new Dictionary<string, string>
-      {
-        {"foo", "bar"}
-      });
-
-      Log.Logger.Debug("response: {r}", r);
-
-      Assert.NotNull(r.ResourceId);
-
-      Thread.Sleep(1000);
-
-      var finalResult = _client.Retrieve(r.ResourceId);
-
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
-
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-
-      Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
-    }
-
-
-    [Test]
-    public void ShouldPing()
-    {
-      Assert.True(_client.Ping());
-    }
-
-    [Test]
-    public void ShouldFetchContentWithoutCallback()
-    {
-      var r = _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip");
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-
-      Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(0, r.ContentLength);
-      Assert.Null(r.CreationDate);
-      Assert.Null(r.Checksum);
-      Assert.Null(r.ContentType);
-
-      Assert.NotNull(r.RawResponse);
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.RequestId);
-
-      Assert.Null(r.Message);
-      Assert.Null(r.ExpirationDate);
-
-      Thread.Sleep(1000);
-
-      var finalResult = _client.Retrieve(r.ResourceId);
+      var finalResult = await _client.Retrieve(r.ResourceId);
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -319,50 +110,20 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
 
 
       Assert.NotNull(finalResult.HostId);
       Assert.NotNull(finalResult.ResourceId);
       Assert.NotNull(finalResult.RequestId);
-
       Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
     }
 
     [Test]
-    public void ShouldFetchContentWithCallback()
+    public async Task ShouldFetchContentWithCallbackAndMetadata()
     {
-      var r = _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip", "https://httpbin.org/post");
-
-      Thread.Sleep(1000);
-
-      var finalResult = _client.Retrieve(r.ResourceId);
-
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
-
-
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-
-      Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
-    }
-
-    [Test]
-    public void ShouldFetchContentWithCallbackAndMetadata()
-    {
-      var r = _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip", "https://httpbin.org/post",
+      var r = await _client.Fetch(
+        "https://scanii.s3.amazonaws.com/eicarcom2.zip",
+        "https://httpbin.org/post",
         new Dictionary<string, string>
         {
           {"hello", "world"}
@@ -370,7 +131,7 @@ namespace UvaSoftware.Scanii.Tests
 
       Thread.Sleep(1000);
 
-      var finalResult = _client.Retrieve(r.ResourceId);
+      var finalResult = await _client.Retrieve(r.ResourceId);
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -381,7 +142,36 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
-      Assert.NotNull(finalResult.RawResponse);
+
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+      Assert.AreEqual(200, finalResult.StatusCode);
+      Assert.Null(finalResult.ResourceLocation);
+    }
+
+    [Test]
+    public async Task ShouldFetchContentWithoutCallback()
+    {
+      var r = await _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip");
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.ResourceLocation);
+      Assert.NotNull(r.HostId);
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.RequestId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = await _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("application/zip", finalResult.ContentType);
+      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
 
 
       Assert.NotNull(finalResult.HostId);
@@ -389,66 +179,265 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(finalResult.RequestId);
 
       Assert.Null(finalResult.ResourceLocation);
-      Assert.Null(finalResult.Message);
-      Assert.Null(finalResult.ExpirationDate);
+    }
+
+
+    [Test]
+    public async Task ShouldPing()
+    {
+      Assert.True(await _client.Ping());
     }
 
     [Test]
-    public void ShouldCreateAuthToken()
+    public async Task ShouldPingAllRegions()
     {
-      var token = _client.CreateAuthToken(5);
-      Assert.NotNull(token.ResourceId);
-      Assert.NotNull(token.CreationDate);
-      Assert.NotNull(token.ExpirationDate);
-
-      Log.Logger.Information("using auth token to create a new client...");
-
-      var client2 = new ScaniiClient(ScaniiTarget.V21, token.ResourceId);
-
-      Log.Logger.Information("using token to process content");
-
-      var result = client2.Process(_eicarFile);
-
-      Assert.NotNull(result.ResourceId);
-      Assert.True(result.Findings.Contains(Finding));
-      Assert.AreEqual(1, result.Findings.Count);
-      Assert.AreEqual(Checksum, result.Checksum);
-      Assert.NotNull(result.ContentLength);
-      Assert.NotNull(result.CreationDate);
-      Assert.NotNull(result.RawResponse);
-    }
-
-    [Test]
-    public void ShouldRetrieveAuthToken()
-    {
-      var token = _client.CreateAuthToken(1);
-      var token2 = _client.RetrieveAuthToken(token.ResourceId);
-
-      Assert.AreEqual(token.ResourceId, token2.ResourceId);
-      Assert.AreEqual(token.ExpirationDate, token2.ExpirationDate);
-      Assert.AreEqual(token.CreationDate, token2.CreationDate);
-    }
-
-    [Test]
-    public void ShouldDeleteAuthToken()
-    {
-      var token = _client.CreateAuthToken(1);
-      _client.DeleteAuthToken(token.ResourceId);
-      var token2 = _client.RetrieveAuthToken(token.ResourceId);
-
-      Assert.AreEqual(token.ResourceId, token2.ResourceId);
-      Assert.AreEqual(token.ExpirationDate, token2.ExpirationDate);
-      Assert.AreEqual(token.CreationDate, token2.CreationDate);
-    }
-
-    [Test]
-    public void ShouldPingAllRegions()
-    {
-      foreach (ScaniiTarget target in Enum.GetValues(typeof(ScaniiTarget)))
+      foreach (var target in ScaniiTarget.All())
       {
-        Log.Logger.Information("creating client for target {target}", target);
-        Assert.IsTrue(new ScaniiClient(target, _key, _secret).Ping());
+        _logger.LogInformation("creating client for target {Target}", target.Endpoint);
+        var client = ScaniiClients.CreateDefault(_key, _secret, target: target);
+        Assert.IsTrue(await client.Ping());
       }
+    }
+
+    [Test]
+    public async Task ShouldProcessAsyncWithCallback()
+    {
+      var r = await _client.ProcessAsync(_eicarFile, "https://httpbin.org/post");
+
+      _logger.LogDebug("response: {@R}", r);
+
+      Assert.NotNull(r.ResourceId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = await _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("text/plain", finalResult.ContentType);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
+    }
+
+    [Test]
+    public async Task ShouldProcessAsyncWithCallbackAndMetadata()
+    {
+      var r = await _client.ProcessAsync(_eicarFile, "https://httpbin.org/post", new Dictionary<string, string>
+      {
+        {"foo", "bar"}
+      });
+
+      _logger.LogDebug("response: {@R}", r);
+
+      Assert.NotNull(r.ResourceId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = await _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("text/plain", finalResult.ContentType);
+      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
+    }
+
+    [Test]
+    public async Task ShouldProcessAsyncWithoutCallback()
+    {
+      _logger.LogInformation("submitting content for async processing...");
+
+      var r = await _client.ProcessAsync(_eicarFile, metadata: new Dictionary<string, string>
+      {
+        {"foo", "bar"}
+      });
+
+      _logger.LogDebug("response: {@R}", r);
+
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.ResourceLocation);
+
+      Assert.NotNull(r.HostId);
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.RequestId);
+
+
+      _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = await _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("text/plain", finalResult.ContentType);
+      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
+      Assert.AreEqual(1, finalResult.Metadata.Count);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
+    }
+
+    [Test]
+    public async Task ShouldProcessAsyncWithoutCallBackAndMetadata()
+    {
+      _logger.LogInformation("submitting content for async processing...");
+
+      var r = await _client.ProcessAsync(_eicarFile);
+
+      _logger.LogDebug("response: {@R}", r);
+
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.ResourceLocation);
+
+      Assert.NotNull(r.HostId);
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.RequestId);
+
+      _logger.LogInformation("request looks good, trying to retrieve result for id: {id}", r.ResourceId);
+
+      Thread.Sleep(1000);
+
+      var finalResult = await _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("text/plain", finalResult.ContentType);
+      Assert.AreEqual(0, finalResult.Metadata.Count);
+      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
+    }
+
+    [Test]
+    public async Task ShouldProcessContent()
+    {
+      // starting with a simple content scan (sync)
+      var r = await _client.Process(_eicarFile, metadata: new Dictionary<string, string>
+      {
+        {"foo", "bar"}
+      });
+
+      _logger.LogDebug("response: {r}", r);
+
+      Assert.NotNull(r.ResourceId);
+      Assert.True(r.Findings.Contains(Finding));
+      Assert.AreEqual(1, r.Findings.Count);
+      Assert.AreEqual("text/plain", r.ContentType);
+      Assert.AreEqual("bar", r.Metadata["foo"]);
+      Assert.AreEqual(1, r.Metadata.Count);
+      Assert.AreEqual(Checksum, r.Checksum);
+      Assert.NotNull(r.ContentLength);
+      Assert.NotNull(r.CreationDate);
+
+
+      Assert.NotNull(r.HostId);
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.ResourceLocation);
+      Assert.NotNull(r.RequestId);
+      Assert.NotNull(r.StatusCode);
+    }
+
+    [Test]
+    public async Task ShouldProcessContentWithoutMetadata()
+    {
+      // starting with a simple content scan (sync)
+      var r = await _client.Process(_eicarFile);
+
+      _logger.LogDebug("response: {@R}", r);
+
+      Assert.NotNull(r.ResourceId);
+      Assert.True(r.Findings.Contains(Finding));
+      Assert.AreEqual(1, r.Findings.Count);
+      Assert.AreEqual("text/plain", r.ContentType);
+      Assert.AreEqual(0, r.Metadata.Count);
+      Assert.AreEqual(Checksum, r.Checksum);
+      Assert.NotNull(r.ContentLength);
+      Assert.NotNull(r.CreationDate);
+
+
+      Assert.NotNull(r.HostId);
+      Assert.NotNull(r.ResourceId);
+      Assert.NotNull(r.ResourceLocation);
+      Assert.NotNull(r.RequestId);
+    }
+
+    [Test]
+    public async Task ShouldRetrieveAuthToken()
+    {
+      var token = await _client.CreateAuthToken(1);
+      var token2 = await _client.RetrieveAuthToken(token.ResourceId);
+
+      Assert.AreEqual(token.ResourceId, token2.ResourceId);
+      Assert.AreEqual(token.ExpirationDate, token2.ExpirationDate);
+      Assert.AreEqual(token.CreationDate, token2.CreationDate);
+    }
+
+    [Test]
+    [Ignore("triage test")]
+    public async Task ShouldTriage()
+    {
+      var r = await _client.Fetch(
+        "",
+        "https://httpbin.org/post",
+        new Dictionary<string, string>
+        {
+          {"hello", "world"}
+        });
+      _logger.LogInformation("here");
+      Thread.Sleep(1000);
+
+      var finalResult = await _client.Retrieve(r.ResourceId);
+
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.True(finalResult.Findings.Contains(Finding));
+      Assert.AreEqual(1, finalResult.Findings.Count);
+      Assert.AreEqual("application/zip", finalResult.ContentType);
+      Assert.AreEqual("world", finalResult.Metadata["hello"]);
+      Assert.AreEqual(1, finalResult.Metadata.Count);
+      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
+      Assert.NotNull(finalResult.ContentLength);
+      Assert.NotNull(finalResult.CreationDate);
+
+
+      Assert.NotNull(finalResult.HostId);
+      Assert.NotNull(finalResult.ResourceId);
+      Assert.NotNull(finalResult.RequestId);
+
+      Assert.Null(finalResult.ResourceLocation);
     }
   }
 }
