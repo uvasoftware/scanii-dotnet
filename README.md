@@ -11,14 +11,23 @@ dotnet add package UvaSoftware.Scanii --version $LATEST_VERSION
 
 ### Basic usage:
  
-```csharp
- // creating the client
-var client = new ScaniiClient(ScaniiTarget.V21, KEY, SECRET);
- 
- // scans a file
-var result = client.Process("C:\proposal.doc")
-Console.WriteLine(result);
+```c#
+using System;
+using System.Threading.Tasks;
+using UvaSoftware.Scanii;
 
+namespace Acme
+{
+  public class Sample
+  {
+    static async Task Main(string[] args)
+    {
+      var client = ScaniiClients.CreateDefault(args[0], args[1]);
+      var result = await client.Process("C:\foo.doc");
+      Console.WriteLine($"findings: {result.Findings}");
+    }  
+  }
+}
 ```
 
 Please note that you will need a valid scanii.com account and API Credentials. 
