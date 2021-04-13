@@ -7,12 +7,16 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        dotnet: [ '2.1.x', '3.1.x', '5.0.x' ]
-    name: JDK ${{ matrix.jdk }} on ${{ matrix.os }}.
+        dotnet: [ '5.0.x' ]
+    name: Dotnet ${{ matrix.dotnet }} on ${{ matrix.os }}.
     steps:
       - uses: actions/checkout@v2
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ matrix.dotnet }}
+      - run: dotnet --info
+      - run: dotnet restore
       - run: dotnet test
+        env:
+          SCANII_CREDS: ${{ secrets.SCANII_CREDS }}
