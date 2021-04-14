@@ -23,6 +23,7 @@ namespace UvaSoftware.Scanii.Tests
     private readonly string _eicarFile = Path.GetTempFileName();
     private readonly string _key;
     private readonly string _secret;
+    private const int PollingLimit = 10;
     private const string Checksum = "cf8bd9dfddff007f75adf4c2be48005cea317c62";
     private const string EicarRemoteChecksum = "bec1b52d350d721c7e22a6d4bb0a92909893a3ae";
 
@@ -64,6 +65,7 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogInformation("using auth token to create a new client...");
     }
+
     [Test]
     public async Task ShouldCreatedUsableAuthTokens()
     {
@@ -99,9 +101,7 @@ namespace UvaSoftware.Scanii.Tests
     {
       var r = await _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip", "https://httpbin.org/post");
 
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult((async () => await _client.Retrieve(r.ResourceId))).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -129,9 +129,7 @@ namespace UvaSoftware.Scanii.Tests
           {"hello", "world"}
         });
 
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -161,9 +159,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(r.ResourceId);
       Assert.NotNull(r.RequestId);
 
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -208,9 +204,7 @@ namespace UvaSoftware.Scanii.Tests
 
       Assert.NotNull(r.ResourceId);
 
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -239,9 +233,7 @@ namespace UvaSoftware.Scanii.Tests
 
       Assert.NotNull(r.ResourceId);
 
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -281,9 +273,7 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
 
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -319,11 +309,11 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(r.ResourceId);
       Assert.NotNull(r.RequestId);
 
-      _logger.LogInformation("request looks good, trying to retrieve result for id: {id}", r.ResourceId);
+      _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
 
-      Thread.Sleep(1000);
 
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
+
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -418,9 +408,7 @@ namespace UvaSoftware.Scanii.Tests
           {"hello", "world"}
         });
       _logger.LogInformation("here");
-      Thread.Sleep(1000);
-
-      var finalResult = await _client.Retrieve(r.ResourceId);
+      var finalResult = await PollForResult(async () => await _client.Retrieve(r.ResourceId)).Result;
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -438,6 +426,26 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(finalResult.RequestId);
 
       Assert.Null(finalResult.ResourceLocation);
+    }
+
+    private static async Task<T> PollForResult<T>(Func<T> function)
+    {
+      var attempt = 0;
+      while (true)
+      {
+        await Console.Out.WriteLineAsync($"polling for result {attempt + 1}/{PollingLimit}");
+        try
+        {
+          return function.Invoke();
+        }
+        catch (ScaniiException e)
+        {
+          attempt += 1;
+          if (attempt > PollingLimit)
+            throw;
+          Thread.Sleep(attempt * 500);
+        }
+      }
     }
   }
 }
