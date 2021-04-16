@@ -20,6 +20,11 @@ namespace UvaSoftware.Scanii.Internal
 
     public DefaultScaniiClient(ScaniiTarget target, string key, string secret, ILogger logger, HttpClient httpClient)
     {
+      if (key is {Length: 0})
+      {
+        throw new ArgumentException("API key cannot be the empty string.");
+      }
+
       _logger = logger;
       _httpClient = httpClient;
       ConfigureClient(target, key, secret);
@@ -63,13 +68,13 @@ namespace UvaSoftware.Scanii.Internal
     {
       var req = new MultipartFormDataContent {{new StreamContent(contents), "file"}};
 
-      if (callback != null) req.Add(new StringContent(callback), "callback");
-
       if (metadata != null)
         foreach (var keyValuePair in metadata)
           req.Add(new StringContent(keyValuePair.Value), $"metadata[{keyValuePair.Key}]");
 
-      using var response = await _httpClient.PostAsync("/v2.1/files/async", req);
+      if (callback != null) req.Add(new StringContent(callback), "callback");
+
+      using var response = _httpClient.PostAsync("/v2.1/files/async", req).Result;
       _logger.LogDebug("status code {Code}", response.StatusCode);
 
       if (response.StatusCode == HttpStatusCode.Accepted)
@@ -98,7 +103,7 @@ namespace UvaSoftware.Scanii.Internal
           $"Invalid HTTP response from service, code: {response.StatusCode} message: {response.Content.ReadAsStringAsync()}");
 
       var body = await response.Content.ReadAsStringAsync();
-      _logger.LogDebug(body);
+      _logger.LogDebug("{Body}", body);
       return DecorateEntity(
         JsonSerializer.Deserialize<ScaniiProcessingResult>(body),
         response);
