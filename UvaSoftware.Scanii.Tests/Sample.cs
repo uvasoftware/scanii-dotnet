@@ -1,9 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using UvaSoftware.Scanii;
 
-namespace Acme
+namespace UvaSoftware.Scanii.Tests
 {
+  [SuppressMessage("ReSharper", "UnusedMember.Local")]
   public class Sample
   {
     static async Task Main(string[] args)

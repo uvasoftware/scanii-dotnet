@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Threading;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -11,20 +11,41 @@ using Serilog;
 using Serilog.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
+// ReSharper disable TemplateIsNotCompileTimeConstantProblem
+
 namespace UvaSoftware.Scanii.Tests
 {
   [TestFixture]
   public class ScaniiClientTests
   {
+    [OneTimeSetUp]
+    public void Setup()
+    {
+      _eicarFile = Path.GetTempFileName();
+      Console.WriteLine($"using temp file {_eicarFile}");
+      using var output = new StreamWriter(_eicarFile);
+      output.WriteLine(Eicar);
+      output.Close();
+      // calculating checksum (oddly complex on dotnet): 
+      var sha1 = SHA1.Create().ComputeHash(File.ReadAllBytes(_eicarFile));
+      _checksum = BitConverter.ToString(sha1).ToLower().Replace("-","");
+      _logger.LogDebug("using temp file {E}, with sha1 {S}", _eicarFile, _checksum);
+    }
+
+    [OneTimeTearDown]
+    public void TearDown()
+    {
+      File.Delete(Path.GetTempFileName());
+    }
+
     private readonly IScaniiClient _client;
     private readonly ILogger _logger;
     private const string Eicar = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
     private const string Finding = "content.malicious.eicar-test-signature";
-    private readonly string _eicarFile = Path.GetTempFileName();
+    private string _eicarFile;
     private readonly string _key;
     private readonly string _secret;
-    private const int PollingLimit = 10;
-    private const string Checksum = "cf8bd9dfddff007f75adf4c2be48005cea317c62";
+    private string _checksum;
     private const string EicarRemoteChecksum = "bec1b52d350d721c7e22a6d4bb0a92909893a3ae";
 
     public ScaniiClientTests()
@@ -39,20 +60,19 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("ctor");
 
+
       if (Environment.GetEnvironmentVariable("SCANII_CREDS") != null)
       {
         // ReSharper disable once PossibleNullReferenceException
-        var creds = Environment.GetEnvironmentVariable("SCANII_CREDS").Split(':');
-        _key = creds[0];
-        _secret = creds[1];
+        var credentials = Environment.GetEnvironmentVariable("SCANII_CREDS").Split(':');
+        _key = credentials[0];
+        _secret = credentials[1];
       }
 
       Debug.Assert(_secret != null, nameof(_secret) + " != null");
       Debug.Assert(_key != null, nameof(_key) + " != null");
 
       _client = ScaniiClients.CreateDefault(_key, _secret, _logger, new HttpClient());
-      using var output = new StreamWriter(_eicarFile);
-      output.WriteLine(Eicar);
     }
 
     [Test]
@@ -79,7 +99,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(result.ResourceId);
       Assert.True(result.Findings.Contains(Finding));
       Assert.AreEqual(1, result.Findings.Count);
-      Assert.AreEqual(Checksum, result.Checksum);
+      Assert.AreEqual(_checksum, result.Checksum);
       Assert.NotNull(result.ContentLength);
       Assert.NotNull(result.CreationDate);
     }
@@ -101,7 +121,7 @@ namespace UvaSoftware.Scanii.Tests
     {
       var r = await _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip", "https://httpbin.org/post");
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -129,7 +149,7 @@ namespace UvaSoftware.Scanii.Tests
           {"hello", "world"}
         });
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -159,7 +179,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(r.ResourceId);
       Assert.NotNull(r.RequestId);
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -204,13 +224,13 @@ namespace UvaSoftware.Scanii.Tests
 
       Assert.NotNull(r.ResourceId);
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
 
@@ -233,14 +253,14 @@ namespace UvaSoftware.Scanii.Tests
 
       Assert.NotNull(r.ResourceId);
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual("bar", finalResult.Metadata["foo"]);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
 
@@ -273,7 +293,7 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -281,7 +301,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual("bar", finalResult.Metadata["foo"]);
       Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
 
@@ -312,7 +332,7 @@ namespace UvaSoftware.Scanii.Tests
       _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
 
 
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
 
       Assert.NotNull(finalResult.ResourceId);
@@ -320,7 +340,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, finalResult.Findings.Count);
       Assert.AreEqual("text/plain", finalResult.ContentType);
       Assert.AreEqual(0, finalResult.Metadata.Count);
-      Assert.AreEqual(Checksum, finalResult.Checksum);
+      Assert.AreEqual(_checksum, finalResult.Checksum);
       Assert.NotNull(finalResult.ContentLength);
       Assert.NotNull(finalResult.CreationDate);
 
@@ -349,7 +369,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual("text/plain", r.ContentType);
       Assert.AreEqual("bar", r.Metadata["foo"]);
       Assert.AreEqual(1, r.Metadata.Count);
-      Assert.AreEqual(Checksum, r.Checksum);
+      Assert.AreEqual(_checksum, r.Checksum);
       Assert.NotNull(r.ContentLength);
       Assert.NotNull(r.CreationDate);
 
@@ -374,7 +394,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.AreEqual(1, r.Findings.Count);
       Assert.AreEqual("text/plain", r.ContentType);
       Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(Checksum, r.Checksum);
+      Assert.AreEqual(_checksum, r.Checksum);
       Assert.NotNull(r.ContentLength);
       Assert.NotNull(r.CreationDate);
 
@@ -408,7 +428,7 @@ namespace UvaSoftware.Scanii.Tests
           {"hello", "world"}
         });
       _logger.LogInformation("here");
-      var finalResult = PollForResult(() => _client.Retrieve(r.ResourceId));
+      var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
       Assert.NotNull(finalResult.ResourceId);
       Assert.True(finalResult.Findings.Contains(Finding));
@@ -426,26 +446,6 @@ namespace UvaSoftware.Scanii.Tests
       Assert.NotNull(finalResult.RequestId);
 
       Assert.Null(finalResult.ResourceLocation);
-    }
-
-    private static T PollForResult<T>(Func<Task<T>> task)
-    {
-      var attempt = 0;
-      while (true)
-      {
-        Console.Out.WriteLine($"polling for result {attempt + 1}/{PollingLimit}");
-        try
-        {
-          return task.Invoke().Result;
-        }
-        catch (AggregateException)
-        {
-          attempt += 1;
-          if (attempt > PollingLimit)
-            throw;
-          Thread.Sleep(attempt * 500);
-        }
-      }
     }
   }
 }
