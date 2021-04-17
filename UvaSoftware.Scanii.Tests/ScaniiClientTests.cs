@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Serilog;
+using Serilog.Events;
 using Serilog.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -28,7 +29,7 @@ namespace UvaSoftware.Scanii.Tests
       output.Close();
       // calculating checksum (oddly complex on dotnet): 
       var sha1 = SHA1.Create().ComputeHash(File.ReadAllBytes(_eicarFile));
-      _checksum = BitConverter.ToString(sha1).ToLower().Replace("-","");
+      _checksum = BitConverter.ToString(sha1).ToLower().Replace("-", "");
       _logger.LogDebug("using temp file {E}, with sha1 {S}", _eicarFile, _checksum);
     }
 
@@ -52,7 +53,7 @@ namespace UvaSoftware.Scanii.Tests
     {
       var serilogLogger = new LoggerConfiguration()
         .WriteTo.Console()
-        .MinimumLevel.Is(LevelConvert.ToSerilogLevel(LogLevel.Debug))
+        .MinimumLevel.Is(LogEventLevel.Debug)
         .CreateLogger();
 
       var provider = new SerilogLoggerProvider(serilogLogger);
