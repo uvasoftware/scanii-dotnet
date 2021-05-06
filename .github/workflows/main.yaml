@@ -17,3 +17,5 @@ jobs:
         run: dotnet pack --configuration Release
       - name: Publish the package to Nuget
         run: dotnet nuget push UvaSoftware.Scanii/bin/Release/Uvasoftware.Scanii.*.nupkg -k ${NUGET_KEY} -s https://api.nuget.org/v3/index.json
+        env: 
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
