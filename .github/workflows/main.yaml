@@ -19,3 +19,13 @@ jobs:
         run: dotnet nuget push UvaSoftware.Scanii/bin/Release/Uvasoftware.Scanii.*.nupkg -k ${NUGET_KEY} -s https://api.nuget.org/v3/index.json
         env: 
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
+      - name: Releasing
+        run: |
+          VERSION=$(cat UvaSoftware.Scanii/*.csproj | grep '<Version>' | awk -F '>|<' '{print $3}')
+          echo "###################  using version: v$VERSION ###################"
+
+          # tag repo
+          git config --global user.email "ci@uvasoftware.com"
+          git config --global user.name "Github Actions"
+          git tag -a v"${VERSION}" -m "Release by Github Actions v${{ env.VERSION }}"
+          git push origin v"${{ env.VERSION }}"
