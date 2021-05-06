@@ -17,6 +17,7 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet }}
       - run: dotnet --info
+      - run: dotnet --list-sdks
       - run: dotnet restore
       - run: dotnet test
         env:
