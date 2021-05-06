@@ -4,7 +4,7 @@
     <PackageId>UvaSoftware.Scanii</PackageId>
 
     <!--always rev this up-->
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
 
     <LangVersion>8</LangVersion>
     <Company>Uva Software, LLC</Company>
@@ -15,7 +15,6 @@
     <PackageProjectUrl>https://github.com/uvasoftware/scanii-dotnet</PackageProjectUrl>
     <Copyright>Uva Software, LLC</Copyright>
     <PackageTags>scanii,client</PackageTags>
-    <IncludeSymbols>true</IncludeSymbols>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
