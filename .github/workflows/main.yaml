@@ -1,0 +1,17 @@
+name: Main
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: "Deploying"
+  - uses: actions/setup-dotnet@v1
+    with:
+      dotnet-version: '3.1.x' # SDK Version to use.
+  - run: dotnet build
+  - name: Create the package
+    run: dotnet pack --configuration Release
+  - name: Publish the package to Nuget
+    run: dotnet nuget push UvaSoftware.Scanii/bin/Release/Uvasoftware.Scanii.*.nupkg -k ${NUGET_KEY} -s https://api.nuget.org/v3/index.json
