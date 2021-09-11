@@ -1,3 +1,6 @@
+## v4.1.1
+* Deploy pipeline fixes
+
 ## v4.1.0
 * Downgraded Microsoft.Extensions.Logging.Abstraction on netstandard2 and .net 461 for better compatibility with .net core MVC. Fixes https://github.com/uvasoftware/scanii-dotnet/issues/23
 
