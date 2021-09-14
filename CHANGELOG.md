@@ -1,3 +1,6 @@
+## 4.2.1
+* Rolling back Microsoft.Extensions.Logging.Abstractions to 2.1.1
+
 ## v4.1.1
 * Deploy pipeline fixes
 
