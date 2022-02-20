@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netstandard2.0;net461</TargetFrameworks>
     <PackageId>UvaSoftware.Scanii</PackageId>
 
     <!--always rev this up-->
-    <Version>4.2.1</Version>
+    <Version>5.0.0</Version>
 
     <LangVersion>8</LangVersion>
     <Company>Uva Software, LLC</Company>
@@ -18,26 +18,31 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0"/>
-    <PackageReference Include="System.Text.Json" Version="5.0.2"/>
-    <PackageReference Include="System.Net.Http" Version="4.3.4"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1"/>
-    <PackageReference Include="System.Text.Json" Version="5.0.2"/>
-    <PackageReference Include="System.Net.Http" Version="4.3.4"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1"/>
-    <PackageReference Include="System.Text.Json" Version="5.0.2"/>
-    <PackageReference Include="System.Net.Http" Version="4.3.4"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE"/>
+    <None Include="..\LICENSE" />
   </ItemGroup>
 
   <ItemGroup>

@@ -91,7 +91,7 @@ namespace UvaSoftware.Scanii.Tests
     public async Task ShouldCreatedUsableAuthTokens()
     {
       var token = await _client.CreateAuthToken(5);
-      var client2 = ScaniiClients.CreateDefault(token.ResourceId);
+      var client2 = ScaniiClients.CreateDefault(token);
 
       _logger.LogInformation("using token to process content");
 

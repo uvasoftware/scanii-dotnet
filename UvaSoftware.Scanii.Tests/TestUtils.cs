@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace UvaSoftware.Scanii.Tests
 {
-  public class TestUtils
+  public static class TestUtils
   {
     private const int PollingLimit = 10;
 
