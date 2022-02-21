@@ -20,10 +20,8 @@ namespace UvaSoftware.Scanii.Internal
 
     public DefaultScaniiClient(ScaniiTarget target, string key, string secret, ILogger logger, HttpClient httpClient)
     {
-      
       ValidateCredentials.Validate(key);
-      ValidateCredentials.Validate(secret);
-      
+
       _logger = logger;
       _httpClient = httpClient;
       ConfigureClient(target, key, secret);
