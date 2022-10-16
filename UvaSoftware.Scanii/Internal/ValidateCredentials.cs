@@ -15,11 +15,11 @@ namespace UvaSoftware.Scanii.Internal
       {
         throw new ArgumentOutOfRangeException(nameof(credentials));
       }
+
       if (credentials.Contains(":"))
       {
         throw new ArgumentException("credentials must not include the ':' character");
       }
-
     }
   }
 }
