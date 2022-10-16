@@ -1,3 +1,6 @@
+## 5.0.1
+* Just a deployment fix 
+
 ## 5.0.0
 * Improved credentials validation 
 * Modified the client interface to take in an Authentication Token instead of an arbitrary string
