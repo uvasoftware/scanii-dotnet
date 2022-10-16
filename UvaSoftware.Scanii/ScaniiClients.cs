@@ -12,10 +12,15 @@ namespace UvaSoftware.Scanii
     public static IScaniiClient CreateDefault(string key, string secret, ILogger logger = null,
       HttpClient client = null, ScaniiTarget target = null)
     {
+      if (secret == null) throw new ArgumentNullException(nameof(secret));
+
+      if (key == null) throw new ArgumentNullException(nameof(key));
+
+      if (key.Contains(":")) throw new ArgumentException("secret may not contains ':");
+
       logger ??= NullLogger.Instance;
       client ??= new HttpClient();
       target ??= ScaniiTarget.Auto;
-      ;
       return new DefaultScaniiClient(target, key, secret, logger, client);
     }
 
