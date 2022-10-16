@@ -2,3 +2,5 @@
 /*.*/obj
 /*.*/bin
 .vscode/
+/scanii-dotnet.sln.DotSettings.user
+/scanii-dotnet.sln.DotSettings

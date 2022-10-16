@@ -1,10 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netstandard2.0;net461</TargetFrameworks>
     <PackageId>UvaSoftware.Scanii.Tests</PackageId>
-
-    <!--always rev this up-->
-    <Version>4.0.0</Version>
 
     <LangVersion>8</LangVersion>
     <Company>Uva Software, LLC</Company>
@@ -19,32 +16,36 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+  </ItemGroup>
+  
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="NUnit" Version="3.13.1"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" NoWarn="NU1701"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4"/>
-    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="NUnit" Version="3.13.1"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" NoWarn="NU1701"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4"/>
-    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.4"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.0"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.4" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="NUnit" Version="2.7.1"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" NoWarn="NU1701"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4"/>
-    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.4"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.0"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.4" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UvaSoftware.Scanii\UvaSoftware.Scanii.csproj"/>
+    <ProjectReference Include="..\UvaSoftware.Scanii\UvaSoftware.Scanii.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,5 +53,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="NUnit" Version="3.13.2" />
   </ItemGroup>
 </Project>

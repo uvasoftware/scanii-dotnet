@@ -1,3 +1,8 @@
+## 5.0.0
+* Improved credentials validation 
+* Modified the client interface to take in an Authentication Token instead of an arbitrary string
+* Dotnet 6 support
+
 ## 4.2.1
 * Rolling back Microsoft.Extensions.Logging.Abstractions to 2.1.1
 

@@ -20,10 +20,7 @@ namespace UvaSoftware.Scanii.Internal
 
     public DefaultScaniiClient(ScaniiTarget target, string key, string secret, ILogger logger, HttpClient httpClient)
     {
-      if (key is {Length: 0})
-      {
-        throw new ArgumentException("API key cannot be the empty string.");
-      }
+      ValidateCredentials.Validate(key);
 
       _logger = logger;
       _httpClient = httpClient;
