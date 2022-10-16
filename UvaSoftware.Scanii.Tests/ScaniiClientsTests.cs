@@ -11,6 +11,8 @@ namespace UvaSoftware.Scanii.Tests
     {
       Assert.Throws<ArgumentNullException>(() => { ScaniiClients.CreateDefault("f", null); });
       Assert.Throws<ArgumentNullException>(() => { ScaniiClients.CreateDefault(null, "f"); });
+      Assert.Throws<ArgumentException>(() => { ScaniiClients.CreateDefault("foo:bar", null); });
+      Assert.Throws<ArgumentException>(() => { ScaniiClients.CreateDefault("foo","bar:goo"); });
       Assert.Throws<ArgumentNullException>(() => { ScaniiClients.CreateDefault("foo:bar", null); });
       Assert.Throws<ArgumentException>(() => { ScaniiClients.CreateDefault("foo:bar", ""); });
     }
