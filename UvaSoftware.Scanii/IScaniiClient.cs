@@ -11,7 +11,7 @@ namespace UvaSoftware.Scanii
   public interface IScaniiClient
   {
     /// <summary>
-    ///   Submits a stream to be processed (http://docs.scanii.com/v2.1/resources.html#files)
+    ///   Submits a stream to be processed (http://docs.scanii.com/v2.2/resources.html#files)
     /// </summary>
     /// <param name="contents">stream of the content to be analyzed</param>
     /// <param name="callback">optional location (URL) to be notified and receive the result</param>
@@ -22,7 +22,7 @@ namespace UvaSoftware.Scanii
       Dictionary<string, string> metadata = null);
 
     /// <summary>
-    ///   Submits a file to be processed (http://docs.scanii.com/v2.1/resources.html#files)
+    ///   Submits a file to be processed (http://docs.scanii.com/v2.2/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
     /// <param name="callback">optional location (URL) to be notified and receive the result</param>
@@ -33,7 +33,7 @@ namespace UvaSoftware.Scanii
       Dictionary<string, string> metadata = null);
 
     /// <summary>
-    ///   Submits a stream to be processed asynchronously (http://docs.scanii.com/v2.1/resources.html#files)
+    ///   Submits a stream to be processed asynchronously (http://docs.scanii.com/v2.2/resources.html#files)
     /// </summary>
     /// <param name="contents">stream of the content to be analyzed</param>
     /// <param name="metadata">optional metadata to be added to this analysis</param>
@@ -44,7 +44,7 @@ namespace UvaSoftware.Scanii
       Dictionary<string, string> metadata = null);
 
     /// <summary>
-    ///   Submits a file to be processed asynchronously (http://docs.scanii.com/v2.1/resources.html#files)
+    ///   Submits a file to be processed asynchronously (http://docs.scanii.com/v2.2/resources.html#files)
     /// </summary>
     /// <param name="path">file path on the local system</param>
     /// <param name="metadata">optional metadata to be added to this analysis</param>
@@ -55,7 +55,7 @@ namespace UvaSoftware.Scanii
       Dictionary<string, string> metadata = null);
 
     /// <summary>
-    ///   Fetches the results of a previously processed file (http://docs.scanii.com/v2.1/resources.html#files)
+    ///   Fetches the results of a previously processed file (http://docs.scanii.com/v2.2/resources.html#files)
     /// </summary>
     /// <param name="id">id of the content/file to be retrieved</param>
     /// <returns>ScaniiResult</returns>
@@ -63,14 +63,14 @@ namespace UvaSoftware.Scanii
     Task<ScaniiProcessingResult> Retrieve(string id);
 
     /// <summary>
-    ///   Pings the scanii service using the credentials provided (http://docs.scanii.com/v2.1/resources.html#ping)
+    ///   Pings the scanii service using the credentials provided (http://docs.scanii.com/v2.2/resources.html#ping)
     /// </summary>
     /// <returns>true if ping was successful, false otherwise</returns>
     /// <exception cref="ScaniiException"></exception>
     Task<bool> Ping();
 
     /// <summary>
-    ///   Makes a fetch call to scanii (http://docs.scanii.com/v2.1/resources.html#files)
+    ///   Makes a fetch call to scanii (http://docs.scanii.com/v2.2/resources.html#files)
     /// </summary>
     /// <param name="location">location (URL) of the content to be processed</param>
     /// <param name="callback">optional location (URL) to be notified and receive the result</param>
@@ -81,7 +81,7 @@ namespace UvaSoftware.Scanii
       Dictionary<string, string> metadata = null);
 
     /// <summary>
-    ///   Creates a new temporary authentication token (http://docs.scanii.com/v2.1/resources.html#auth-tokens)
+    ///   Creates a new temporary authentication token (http://docs.scanii.com/v2.2/resources.html#auth-tokens)
     /// </summary>
     /// <param name="timeoutInSeconds">How long the token should be valid for</param>
     /// <returns>the new auth token</returns>
