@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// ReSharper disable MemberCanBePrivate.Global
+
 namespace UvaSoftware.Scanii
 {
   public class ScaniiTarget

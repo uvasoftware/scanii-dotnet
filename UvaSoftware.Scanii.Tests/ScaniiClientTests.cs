@@ -407,6 +407,13 @@ namespace UvaSoftware.Scanii.Tests
     }
 
     [Test]
+    public async Task ShouldBeSimple()
+    {
+      var r = await _client.Process(_eicarFile);
+      if (r.Findings.Count == 0) Console.WriteLine("Content is safe!");
+    }
+
+    [Test]
     public async Task ShouldRetrieveAuthToken()
     {
       var token = await _client.CreateAuthToken(1);

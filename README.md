@@ -24,7 +24,11 @@ namespace Acme
     {
       var client = ScaniiClients.CreateDefault(args[0], args[1]);
       var result = await client.Process("C:\foo.doc");
-      Console.WriteLine($"findings: {result.Findings}");
+      
+      if (r.Findings.Count == 0)
+      {
+        Console.WriteLine("Content is safe!")
+      }
     }  
   }
 }
