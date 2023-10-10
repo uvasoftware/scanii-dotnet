@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using UvaSoftware.Scanii.Entities;
@@ -8,6 +9,7 @@ namespace UvaSoftware.Scanii
   /// <summary>
   /// Interface for a Scanii API client
   /// </summary>
+  [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
   public interface IScaniiClient
   {
     /// <summary>

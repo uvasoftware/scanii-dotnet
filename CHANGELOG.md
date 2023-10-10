@@ -1,3 +1,6 @@
+## 5.1.0
+* Support [v2.2](https://uvasoftware.github.io/openapi/v22/) of the API, thank you @enidvangils-cer
+
 ## 5.0.1
 * Just a deployment fix 
 
