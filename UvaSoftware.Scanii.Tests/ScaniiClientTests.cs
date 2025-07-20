@@ -80,9 +80,9 @@ namespace UvaSoftware.Scanii.Tests
     public async Task ShouldCreateAuthToken()
     {
       var token = await _client.CreateAuthToken(5);
-      Assert.NotNull(token.RequestId);
-      Assert.NotNull(token.CreationDate);
-      Assert.NotNull(token.ExpirationDate);
+      Assert.That(token.RequestId, Is.Not.Null);
+      Assert.That(token.CreationDate, Is.Not.Null);
+      Assert.That(token.ExpirationDate, Is.Not.Null);
 
       _logger.LogInformation("using auth token to create a new client...");
     }
@@ -97,12 +97,12 @@ namespace UvaSoftware.Scanii.Tests
 
       var result = await client2.Process(_eicarFile);
 
-      Assert.NotNull(result.ResourceId);
-      Assert.True(result.Findings.Contains(Finding));
-      Assert.AreEqual(1, result.Findings.Count);
-      Assert.AreEqual(_checksum, result.Checksum);
-      Assert.NotNull(result.ContentLength);
-      Assert.NotNull(result.CreationDate);
+      Assert.That(result.ResourceId, Is.Not.Null);
+      Assert.That(result.Findings.Contains(Finding));
+      Assert.That(result.Findings.Count, Is.EqualTo(1));
+      Assert.That(result.Checksum, Is.EqualTo(_checksum));
+      Assert.That(result.ContentLength, Is.Not.Null);
+      Assert.That(result.CreationDate, Is.Not.Null);
     }
 
     [Test]
@@ -112,9 +112,9 @@ namespace UvaSoftware.Scanii.Tests
       await _client.DeleteAuthToken(token.ResourceId);
       var token2 = await _client.RetrieveAuthToken(token.ResourceId);
 
-      Assert.AreEqual(token.ResourceId, token2.ResourceId);
-      Assert.AreEqual(token.ExpirationDate, token2.ExpirationDate);
-      Assert.AreEqual(token.CreationDate, token2.CreationDate);
+      Assert.That(token.ResourceId, Is.EqualTo(token2.ResourceId));
+      Assert.That(token.ExpirationDate, Is.EqualTo(token2.ExpirationDate));
+      Assert.That(token.CreationDate, Is.EqualTo(token2.CreationDate));
     }
 
     [Test]
@@ -124,19 +124,19 @@ namespace UvaSoftware.Scanii.Tests
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(finalResult.Findings.Count));
+      Assert.That("application/zip", Is.EqualTo(finalResult.ContentType));
+      Assert.That(EicarRemoteChecksum, Is.EqualTo(finalResult.Checksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
     [Test]
@@ -152,57 +152,57 @@ namespace UvaSoftware.Scanii.Tests
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual("world", finalResult.Metadata["hello"]);
-      Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(finalResult.Findings.Count, Is.EqualTo(1));
+      Assert.That(finalResult.ContentType, Is.EqualTo("application/zip"));
+      Assert.That(finalResult.Metadata["hello"], Is.EqualTo("world"));
+      Assert.That(finalResult.Metadata.Count, Is.EqualTo(1));
+      Assert.That(finalResult.Checksum, Is.EqualTo(EicarRemoteChecksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
-      Assert.AreEqual(200, finalResult.StatusCode);
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
+      Assert.That(finalResult.StatusCode, Is.EqualTo(200));
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
     [Test]
     public async Task ShouldFetchContentWithoutCallback()
     {
       var r = await _client.Fetch("https://scanii.s3.amazonaws.com/eicarcom2.zip");
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.RequestId);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.ResourceLocation, Is.Not.Null);
+      Assert.That(r.HostId, Is.Not.Null);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.RequestId, Is.Not.Null);
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(finalResult.Findings.Count, Is.EqualTo(1));
+      Assert.That(finalResult.ContentType, Is.EqualTo("application/zip"));
+      Assert.That(finalResult.Checksum, Is.EqualTo(EicarRemoteChecksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
 
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
 
     [Test]
     public async Task ShouldPing()
     {
-      Assert.True(await _client.Ping());
+      Assert.That(await _client.Ping(), Is.True);
     }
 
     [Test]
@@ -212,7 +212,7 @@ namespace UvaSoftware.Scanii.Tests
       {
         _logger.LogInformation("creating client for target {Target}", target.Endpoint);
         var client = ScaniiClients.CreateDefault(_key, _secret, target: target);
-        Assert.IsTrue(await client.Ping());
+        Assert.That(await client.Ping(), Is.True);
       }
     }
 
@@ -223,23 +223,23 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("response: {@R}", r);
 
-      Assert.NotNull(r.ResourceId);
+      Assert.That(r.ResourceId, Is.Not.Null);
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(finalResult.Findings.Count, Is.EqualTo(1));
+      Assert.That("text/plain", Is.EqualTo(finalResult.ContentType));
+      Assert.That(_checksum, Is.EqualTo(finalResult.Checksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
 
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
     [Test]
@@ -252,24 +252,24 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("response: {@R}", r);
 
-      Assert.NotNull(r.ResourceId);
+      Assert.That(r.ResourceId, Is.Not.Null);
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(finalResult.Findings.Count));
+      Assert.That("text/plain", Is.EqualTo(finalResult.ContentType));
+      Assert.That("bar", Is.EqualTo(finalResult.Metadata["foo"]));
+      Assert.That(_checksum, Is.EqualTo(finalResult.Checksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
 
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
     [Test]
@@ -284,34 +284,34 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("response: {@R}", r);
 
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.ResourceLocation, Is.Not.Null);
 
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.RequestId);
+      Assert.That(r.HostId, Is.Not.Null);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.RequestId, Is.Not.Null);
 
 
       _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual("bar", finalResult.Metadata["foo"]);
-      Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(finalResult.Findings.Count));
+      Assert.That("text/plain", Is.EqualTo(finalResult.ContentType));
+      Assert.That("bar", Is.EqualTo(finalResult.Metadata["foo"]));
+      Assert.That(1, Is.EqualTo(finalResult.Metadata.Count));
+      Assert.That(_checksum, Is.EqualTo(finalResult.Checksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
 
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
     [Test]
@@ -323,12 +323,12 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("response: {@R}", r);
 
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.ResourceLocation, Is.Not.Null);
 
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.RequestId);
+      Assert.That(r.HostId, Is.Not.Null);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.RequestId, Is.Not.Null);
 
       _logger.LogInformation("request looks good, trying to retrieve result for id: {Id}", r.ResourceId);
 
@@ -336,21 +336,21 @@ namespace UvaSoftware.Scanii.Tests
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("text/plain", finalResult.ContentType);
-      Assert.AreEqual(0, finalResult.Metadata.Count);
-      Assert.AreEqual(_checksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(finalResult.Findings.Count));
+      Assert.That("text/plain", Is.EqualTo(finalResult.ContentType));
+      Assert.That(0, Is.EqualTo(finalResult.Metadata.Count));
+      Assert.That(_checksum, Is.EqualTo(finalResult.Checksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
 
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
 
     [Test]
@@ -364,22 +364,22 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("response: {r}", r);
 
-      Assert.NotNull(r.ResourceId);
-      Assert.True(r.Findings.Contains(Finding));
-      Assert.AreEqual(1, r.Findings.Count);
-      Assert.AreEqual("text/plain", r.ContentType);
-      Assert.AreEqual("bar", r.Metadata["foo"]);
-      Assert.AreEqual(1, r.Metadata.Count);
-      Assert.AreEqual(_checksum, r.Checksum);
-      Assert.NotNull(r.ContentLength);
-      Assert.NotNull(r.CreationDate);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(r.Findings.Count));
+      Assert.That("text/plain", Is.EqualTo(r.ContentType));
+      Assert.That("bar", Is.EqualTo(r.Metadata["foo"]));
+      Assert.That(1, Is.EqualTo(r.Metadata.Count));
+      Assert.That(_checksum, Is.EqualTo(r.Checksum));
+      Assert.That(r.ContentLength, Is.Not.Null);
+      Assert.That(r.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-      Assert.NotNull(r.RequestId);
-      Assert.NotNull(r.StatusCode);
+      Assert.That(r.HostId, Is.Not.Null);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.ResourceLocation, Is.Not.Null);
+      Assert.That(r.RequestId, Is.Not.Null);
+      Assert.That(r.StatusCode, Is.Not.Null);
     }
 
     [Test]
@@ -390,20 +390,20 @@ namespace UvaSoftware.Scanii.Tests
 
       _logger.LogDebug("response: {@R}", r);
 
-      Assert.NotNull(r.ResourceId);
-      Assert.True(r.Findings.Contains(Finding));
-      Assert.AreEqual(1, r.Findings.Count);
-      Assert.AreEqual("text/plain", r.ContentType);
-      Assert.AreEqual(0, r.Metadata.Count);
-      Assert.AreEqual(_checksum, r.Checksum);
-      Assert.NotNull(r.ContentLength);
-      Assert.NotNull(r.CreationDate);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(r.Findings.Count));
+      Assert.That("text/plain", Is.EqualTo(r.ContentType));
+      Assert.That(0, Is.EqualTo(r.Metadata.Count));
+      Assert.That(_checksum, Is.EqualTo(r.Checksum));
+      Assert.That(r.ContentLength, Is.Not.Null);
+      Assert.That(r.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(r.HostId);
-      Assert.NotNull(r.ResourceId);
-      Assert.NotNull(r.ResourceLocation);
-      Assert.NotNull(r.RequestId);
+      Assert.That(r.HostId, Is.Not.Null);
+      Assert.That(r.ResourceId, Is.Not.Null);
+      Assert.That(r.ResourceLocation, Is.Not.Null);
+      Assert.That(r.RequestId, Is.Not.Null);
     }
 
     [Test]
@@ -419,9 +419,9 @@ namespace UvaSoftware.Scanii.Tests
       var token = await _client.CreateAuthToken(1);
       var token2 = await _client.RetrieveAuthToken(token.ResourceId);
 
-      Assert.AreEqual(token.ResourceId, token2.ResourceId);
-      Assert.AreEqual(token.ExpirationDate, token2.ExpirationDate);
-      Assert.AreEqual(token.CreationDate, token2.CreationDate);
+      Assert.That(token.ResourceId, Is.EqualTo(token2.ResourceId));
+      Assert.That(token.ExpirationDate, Is.EqualTo(token2.ExpirationDate));
+      Assert.That(token.CreationDate, Is.EqualTo(token2.CreationDate));
     }
 
     [Test]
@@ -438,22 +438,22 @@ namespace UvaSoftware.Scanii.Tests
       _logger.LogInformation("here");
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.True(finalResult.Findings.Contains(Finding));
-      Assert.AreEqual(1, finalResult.Findings.Count);
-      Assert.AreEqual("application/zip", finalResult.ContentType);
-      Assert.AreEqual("world", finalResult.Metadata["hello"]);
-      Assert.AreEqual(1, finalResult.Metadata.Count);
-      Assert.AreEqual(EicarRemoteChecksum, finalResult.Checksum);
-      Assert.NotNull(finalResult.ContentLength);
-      Assert.NotNull(finalResult.CreationDate);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.Findings.Contains(Finding));
+      Assert.That(1, Is.EqualTo(finalResult.Findings.Count));
+      Assert.That("application/zip", Is.EqualTo(finalResult.ContentType));
+      Assert.That("world", Is.EqualTo(finalResult.Metadata["hello"]));
+      Assert.That(1, Is.EqualTo(finalResult.Metadata.Count));
+      Assert.That(EicarRemoteChecksum, Is.EqualTo(finalResult.Checksum));
+      Assert.That(finalResult.ContentLength, Is.Not.Null);
+      Assert.That(finalResult.CreationDate, Is.Not.Null);
 
 
-      Assert.NotNull(finalResult.HostId);
-      Assert.NotNull(finalResult.ResourceId);
-      Assert.NotNull(finalResult.RequestId);
+      Assert.That(finalResult.HostId, Is.Not.Null);
+      Assert.That(finalResult.ResourceId, Is.Not.Null);
+      Assert.That(finalResult.RequestId, Is.Not.Null);
 
-      Assert.Null(finalResult.ResourceLocation);
+      Assert.That(finalResult.ResourceLocation, Is.Null);
     }
   }
 }

@@ -1,3 +1,7 @@
+## 6.0.0
+* Added support for a new CA1 region
+* Now requires .NET 8 or later
+
 ## 5.1.0
 * Support [v2.2](https://uvasoftware.github.io/openapi/v22/) of the API, thank you @enidvangils-cer
 
