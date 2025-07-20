@@ -1,3 +1,7 @@
+## 6.0.1
+
+* Added Readme to NuGet package
+
 ## 6.0.0
 * Added support for a new CA1 region
 * Now requires .NET 8 or later
@@ -25,7 +29,7 @@
 ## v4.0.2
 * Dropped RestSharp in favor of native HttpClient and made HttpClient configurable
 * Dropped Serilog in favor of MS.Extensions.Logging.Abstraction (https://github.com/uvasoftware/scanii-dotnet/issues/17)
-* Extracted main class into an interface IScaniiClient
+* Extracted the main class into an interface IScaniiClient
 * Added Stream support (https://github.com/uvasoftware/scanii-dotnet/issues/16)
 * Extended tests suite including multiple .net runtimes and OSs
 
