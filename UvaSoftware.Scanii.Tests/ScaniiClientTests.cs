@@ -97,7 +97,7 @@ namespace UvaSoftware.Scanii.Tests
 
       var result = await client2.Process(_eicarFile);
 
-      Assert.That(result.ResourceId, Is.Not.Null);;
+      Assert.That(result.ResourceId, Is.Not.Null);
       Assert.That(result.Findings.Contains(Finding));
       Assert.That(result.Findings.Count, Is.EqualTo(1));
       Assert.That(result.Checksum, Is.EqualTo(_checksum));
@@ -178,7 +178,7 @@ namespace UvaSoftware.Scanii.Tests
       Assert.That(r.ResourceLocation, Is.Not.Null);
       Assert.That(r.HostId, Is.Not.Null);
       Assert.That(r.ResourceId, Is.Not.Null);
-      Assert.That(r.RequestId, Is.Not.Null );
+      Assert.That(r.RequestId, Is.Not.Null);
 
       var finalResult = TestUtils.PollForResult(() => _client.Retrieve(r.ResourceId));
 
@@ -202,7 +202,7 @@ namespace UvaSoftware.Scanii.Tests
     [Test]
     public async Task ShouldPing()
     {
-      Assert.That(await _client.Ping());
+      Assert.That(await _client.Ping(), Is.True);
     }
 
     [Test]
@@ -212,7 +212,7 @@ namespace UvaSoftware.Scanii.Tests
       {
         _logger.LogInformation("creating client for target {Target}", target.Endpoint);
         var client = ScaniiClients.CreateDefault(_key, _secret, target: target);
-        Assert.That(await client.Ping());
+        Assert.That(await client.Ping(), Is.True);
       }
     }
 
